@@ -7,17 +7,17 @@ import bcrypt from "bcryptjs";
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 
-const db = drizzle({ client: pool });
+export const db = drizzle({ client: pool });
 
-async function main() {
-    const user: typeof usersTable.$inferInsert = {
-        name: "Admin",
-        email: "admin@admin.com",
-        password: bcrypt.hashSync("admin"),
-        role: "ADMIN",
-    };
-    await db.insert(usersTable).values(user);
-    console.log("Admin user created!");
-}
+// async function main() {
+//     const user: typeof usersTable.$inferInsert = {
+//         name: "Admin",
+//         email: "admin@admin.com",
+//         password: bcrypt.hashSync("admin"),
+//         role: "ADMIN",
+//     };
+//     await db.insert(usersTable).values(user);
+//     console.log("Admin user created!");
+// }
 
-main();
+// main();
