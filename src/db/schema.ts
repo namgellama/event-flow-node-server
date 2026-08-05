@@ -1,11 +1,10 @@
-import { defineRelations } from "drizzle-orm";
 import {
     pgEnum,
     pgTable,
+    text,
     timestamp,
     uuid,
     varchar,
-    text,
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
@@ -28,6 +27,7 @@ export const eventStatusEnum = pgEnum("event_status", [
     "CANCELLED",
     "FAILED",
 ]);
+export type EventStatus = (typeof eventStatusEnum.enumValues)[number];
 
 export const eventsTable = pgTable("events", {
     id: uuid("id").primaryKey().defaultRandom(),

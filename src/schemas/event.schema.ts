@@ -1,0 +1,11 @@
+import { z } from "zod";
+
+export const createEventSchema = z.object({
+    name: z.string().nonempty("Name is required"),
+    description: z
+        .string()
+        .min(3, "Description must be at least 3 characters long"),
+    scheduledAt: z.coerce.date(),
+});
+
+export type CreateEventInput = z.infer<typeof createEventSchema>;
