@@ -1,0 +1,21 @@
+{
+    "name": "event-flow-server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "tsx --watch src/index.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "express": "^5.2.1"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.1.2",
+        "tsx": "^4.23.6",
+        "typescript": "^7.0.2"
+    }
+}
