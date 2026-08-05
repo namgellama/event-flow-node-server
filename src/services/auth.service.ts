@@ -56,3 +56,7 @@ export async function login(res: Response, body: LoginInput) {
 
     return { accessToken, refreshToken };
 }
+
+export async function logout(res: Response) {
+    res.clearCookie("refreshToken");
+}

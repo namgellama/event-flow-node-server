@@ -25,3 +25,13 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         next(error);
     }
 }
+
+export async function logout(_req: Request, res: Response, next: NextFunction) {
+    try {
+        await authService.logout(res);
+
+        sendResponse(res, null, "User logged out successfully");
+    } catch (error) {
+        next(error);
+    }
+}
