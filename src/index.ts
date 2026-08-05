@@ -3,7 +3,7 @@ import express, { Request, Response } from "express";
 import { env } from "./config/env";
 import { errorHandler } from "./errors/error-handler";
 import { notFound } from "./errors/not-found";
-import authRoutes from "./routes/auth.route";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 

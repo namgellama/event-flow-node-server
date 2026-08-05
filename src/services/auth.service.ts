@@ -3,13 +3,13 @@ import { Response } from "express";
 import ms from "ms";
 import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
-import * as usersRepository from "../repositories/user.repository";
+import * as userRepository from "../repositories/user.repository";
 import { LoginInput, RegisterInput } from "../schemas/auth.schema";
 import { User } from "../types/user";
 import { signToken, verifyToken } from "../utils/jwt";
 
 export async function register(body: RegisterInput) {
-    const existing = await usersRepository.findByEmail(body.email);
+    const existing = await userRepository.findByEmail(body.email);
 
     if (existing) {
         throw new AppError(409, "Email already exists");
@@ -17,7 +17,7 @@ export async function register(body: RegisterInput) {
 
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
-    return await usersRepository.create({
+    return await userRepository.create({
         ...body,
         password: hashedPassword,
         role: "USER",
@@ -25,7 +25,7 @@ export async function register(body: RegisterInput) {
 }
 
 export async function login(res: Response, body: LoginInput) {
-    const existing = await usersRepository.findByEmail(body.email);
+    const existing = await userRepository.findByEmail(body.email);
 
     if (!existing) {
         throw new AppError(401, "Invalid email or password");
@@ -65,7 +65,7 @@ export async function logout(res: Response) {
 export async function refreshToken(token: string) {
     const payload = verifyToken(token, env.JWT_REFRESH_SECRET);
 
-    const user = await usersRepository.findById(payload.sub);
+    const user = await userRepository.findById(payload.sub);
 
     if (!user) {
         throw new AppError(401, "User not found");
@@ -79,7 +79,7 @@ export async function refreshToken(token: string) {
 }
 
 export async function getMe(userId: string): Promise<User> {
-    const user = await usersRepository.findById(userId);
+    const user = await userRepository.findById(userId);
 
     if (!user) {
         throw new AppError(404, "User not found");
