@@ -13,7 +13,7 @@ export async function protect(
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            next(new AppError(401, "Unauthenticated - no token found"));
+            next(new AppError(401, "Not authenticated - no token found"));
             return;
         }
 
@@ -24,7 +24,7 @@ export async function protect(
         const user = await usersRepository.findById(payload.sub);
 
         if (!user) {
-            next(new AppError(401, "Unauthenticated - user not found"));
+            next(new AppError(401, "Not authenticated - user not found"));
             return;
         }
 
@@ -42,7 +42,7 @@ export async function protect(
 
 export function admin(req: Request, _res: Response, next: NextFunction) {
     if (req.user!.role !== "ADMIN") {
-        next(new AppError(403, "Unauthorized - need admin access"));
+        next(new AppError(403, "Not authorized - need admin access"));
         return;
     }
 

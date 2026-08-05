@@ -5,6 +5,7 @@ import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
 import * as usersRepository from "../repositories/user.repository";
 import { LoginInput, RegisterInput } from "../schemas/auth.schema";
+import { User } from "../types/user";
 import { signToken, verifyToken } from "../utils/jwt";
 
 export async function register(body: RegisterInput) {
@@ -75,4 +76,14 @@ export async function refreshToken(token: string) {
         env.JWT_ACCESS_SECRET,
         env.JWT_ACCESS_EXPIRY,
     );
+}
+
+export async function getMe(userId: string): Promise<User> {
+    const user = await usersRepository.findById(userId);
+
+    if (!user) {
+        throw new AppError(404, "User not found");
+    }
+
+    return user;
 }

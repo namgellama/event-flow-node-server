@@ -1,5 +1,4 @@
 import jwt, { TokenExpiredError } from "jsonwebtoken";
-import { env } from "../config/env";
 import { Role } from "../db/schema";
 import { AppError } from "../errors/app-error";
 
@@ -27,6 +26,6 @@ export function verifyToken(
             throw new AppError(401, "Token expired");
         }
 
-        throw new AppError(401, "Invalid expired token");
+        throw new AppError(401, "Invalid token");
     }
 }

@@ -57,3 +57,13 @@ export async function refreshToken(
         next(error);
     }
 }
+
+export async function getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { password, ...user } = await authService.getMe(req.user!.id);
+
+        sendResponse(res, { user }, "Current user fetched successfully");
+    } catch (error) {
+        next(error);
+    }
+}
