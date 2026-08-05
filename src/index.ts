@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import express, { Request, Response } from "express";
 import { env } from "./config/env";
 import { errorHandler } from "./errors/error-handler";
@@ -7,6 +8,7 @@ import authRoutes from "./routes/auth.route";
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({

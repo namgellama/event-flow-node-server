@@ -1,7 +1,11 @@
 import bcrypt from "bcryptjs";
+import { Response } from "express";
+import ms from "ms";
+import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
 import * as usersRepository from "../repositories/user.repository";
-import { RegisterInput } from "../schemas/auth.schema";
+import { LoginInput, RegisterInput } from "../schemas/auth.schema";
+import { signToken } from "../utils/jwt";
 
 export async function register(body: RegisterInput) {
     const existing = await usersRepository.findByEmail(body.email);
@@ -17,4 +21,38 @@ export async function register(body: RegisterInput) {
         password: hashedPassword,
         role: "USER",
     });
+}
+
+export async function login(res: Response, body: LoginInput) {
+    const existing = await usersRepository.findByEmail(body.email);
+
+    if (!existing) {
+        throw new AppError(401, "Invalid email or password");
+    }
+    const isMatch = await bcrypt.compare(body.password, existing.password);
+
+    if (!isMatch) {
+        throw new AppError(401, "Invalid email or password");
+    }
+
+    const accessToken = signToken(
+        { sub: existing.id, role: existing.role },
+        env.JWT_ACCESS_SECRET,
+        env.JWT_ACCESS_EXPIRY,
+    );
+
+    const refreshToken = signToken(
+        { sub: existing.id, role: existing.role },
+        env.JWT_REFRESH_SECRET,
+        env.JWT_REFRESH_EXPIRY,
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: ms(env.JWT_REFRESH_EXPIRY as ms.StringValue),
+    });
+
+    return { accessToken, refreshToken };
 }

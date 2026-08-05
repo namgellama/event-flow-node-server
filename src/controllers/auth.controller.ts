@@ -10,7 +10,17 @@ export async function register(
     try {
         const newUser = await authService.register(req.body);
 
-        sendResponse(res, { newUser }, 201, "User registered successfully");
+        sendResponse(res, { newUser }, "User registered successfully", 201);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function login(req: Request, res: Response, next: NextFunction) {
+    try {
+        const tokens = await authService.login(res, req.body);
+
+        sendResponse(res, { ...tokens }, "User logged in successfully");
     } catch (error) {
         next(error);
     }

@@ -3,8 +3,8 @@ import { Response } from "express";
 export function sendResponse(
     res: Response,
     data: unknown,
-    statusCode = 200,
     message: string,
+    statusCode = 200,
 ) {
     return res.status(statusCode).json({
         success: true,
