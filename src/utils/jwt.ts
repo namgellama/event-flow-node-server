@@ -1,4 +1,7 @@
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
+import { env } from "../config/env";
+import { Role } from "../db/schema";
+import { AppError } from "../errors/app-error";
 
 export function signToken(
     payload: { sub: string; role: string },
@@ -8,4 +11,19 @@ export function signToken(
     return jwt.sign(payload, secret, {
         expiresIn: expiry as jwt.SignOptions["expiresIn"],
     });
+}
+
+export function verifyToken(token: string): { sub: string; role: Role } {
+    try {
+        return jwt.verify(token, env.JWT_ACCESS_SECRET) as {
+            sub: string;
+            role: Role;
+        };
+    } catch (error) {
+        if (error instanceof TokenExpiredError) {
+            throw new AppError(401, "Token expired");
+        }
+
+        throw new AppError(401, "Invalid expired token");
+    }
 }

@@ -15,6 +15,15 @@ export async function findByEmail(email: string): Promise<User | null> {
     return result[0] ?? null;
 }
 
+export async function findById(id: string): Promise<User | null> {
+    const result = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, id));
+
+    return result[0] ?? null;
+}
+
 export async function create(body: UserCreate) {
     return await db.insert(usersTable).values(body).returning({
         id: usersTable.id,
