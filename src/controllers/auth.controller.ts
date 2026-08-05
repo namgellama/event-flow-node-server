@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { AppError } from "../errors/app-error";
 import * as authService from "../services/auth.service";
 import { sendResponse } from "../utils/response";
 
@@ -31,6 +32,27 @@ export async function logout(_req: Request, res: Response, next: NextFunction) {
         await authService.logout(res);
 
         sendResponse(res, null, "User logged out successfully");
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function refreshToken(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+
+        if (!refreshToken) {
+            next(new AppError(401, "Refresh token missing"));
+            return;
+        }
+
+        const accessToken = await authService.refreshToken(refreshToken);
+
+        sendResponse(res, { accessToken }, "Token refreshed successfully");
     } catch (error) {
         next(error);
     }

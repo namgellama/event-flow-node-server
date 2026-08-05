@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
 import * as usersRepository from "../repositories/user.repository";
 import { verifyToken } from "../utils/jwt";
@@ -18,7 +19,7 @@ export async function protect(
 
         const token = authHeader.split(" ")[1];
 
-        const payload = verifyToken(token);
+        const payload = verifyToken(token, env.JWT_ACCESS_SECRET);
 
         const user = await usersRepository.findById(payload.sub);
 

@@ -13,9 +13,12 @@ export function signToken(
     });
 }
 
-export function verifyToken(token: string): { sub: string; role: Role } {
+export function verifyToken(
+    token: string,
+    secret: string,
+): { sub: string; role: Role } {
     try {
-        return jwt.verify(token, env.JWT_ACCESS_SECRET) as {
+        return jwt.verify(token, secret) as {
             sub: string;
             role: Role;
         };
