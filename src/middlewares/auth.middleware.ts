@@ -38,3 +38,12 @@ export async function protect(
         next(error);
     }
 }
+
+export function admin(req: Request, _res: Response, next: NextFunction) {
+    if (req.user!.role !== "ADMIN") {
+        next(new AppError(403, "Unauthorized - need admin access"));
+        return;
+    }
+
+    next();
+}
