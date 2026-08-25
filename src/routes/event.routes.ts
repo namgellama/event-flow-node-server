@@ -6,6 +6,7 @@ import { createEventSchema } from "../schemas/event.schema";
 
 const router = Router();
 
+router.get("/", protect, admin, eventController.getAllEvents);
 router.post(
     "/",
     protect,

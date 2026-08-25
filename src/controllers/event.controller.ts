@@ -2,6 +2,30 @@ import { NextFunction, Request, Response } from "express";
 import * as eventService from "../services/event.service";
 import { sendResponse } from "../utils/response";
 
+export async function getAllEvents(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || 20;
+
+    try {
+        const { events, pagination } = await eventService.getAll(
+            page,
+            pageSize,
+        );
+
+        sendResponse(
+            res,
+            { events, pagination },
+            "Events fetched successfully",
+        );
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function createEvent(
     req: Request,
     res: Response,
