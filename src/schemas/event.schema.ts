@@ -9,3 +9,17 @@ export const createEventSchema = z.object({
 });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
+
+export const updateEventSchema = createEventSchema
+    .extend({
+        status: z.enum([
+            "SCHEDULED",
+            "PROCESSING",
+            "COMPLETED",
+            "CANCELLED",
+            "FAILED",
+        ]),
+    })
+    .partial();
+
+export type UpdateEventInput = z.infer<typeof updateEventSchema>;

@@ -53,3 +53,17 @@ export async function createEvent(
         next(error);
     }
 }
+
+export async function updateEvent(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const event = await eventService.update(req.params.id, req.body);
+
+        sendResponse(res, { event }, "Event updated successfully");
+    } catch (error) {
+        next(error);
+    }
+}

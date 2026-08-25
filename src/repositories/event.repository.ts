@@ -1,7 +1,7 @@
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { eventsTable } from "../db/schema";
-import { CreateEventInput } from "../schemas/event.schema";
+import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
 
 export async function getAll(limit: number, offset: number) {
     return await db
@@ -34,4 +34,14 @@ export async function create(body: CreateEventInput) {
         .insert(eventsTable)
         .values({ ...body, status: "SCHEDULED" })
         .returning();
+}
+
+export async function update(id: string, body: UpdateEventInput) {
+    const [event] = await db
+        .update(eventsTable)
+        .set({ ...body, updatedAt: new Date() })
+        .where(eq(eventsTable.id, id))
+        .returning();
+
+    return event;
 }
