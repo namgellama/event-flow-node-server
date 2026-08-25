@@ -2,6 +2,7 @@ import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { eventsTable } from "../db/schema";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
+import id from "zod/v4/locales/id.js";
 
 export async function getAll(limit: number, offset: number) {
     return await db
@@ -40,6 +41,15 @@ export async function update(id: string, body: UpdateEventInput) {
     const [event] = await db
         .update(eventsTable)
         .set({ ...body, updatedAt: new Date() })
+        .where(eq(eventsTable.id, id))
+        .returning();
+
+    return event;
+}
+
+export async function remove(id: string) {
+    const [event] = await db
+        .delete(eventsTable)
         .where(eq(eventsTable.id, id))
         .returning();
 

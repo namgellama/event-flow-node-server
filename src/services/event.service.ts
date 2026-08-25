@@ -44,3 +44,13 @@ export async function update(id: string, body: UpdateEventInput) {
 
     return eventRepository.update(id, body);
 }
+
+export async function remove(id: string) {
+    const event = await eventRepository.remove(id);
+
+    if (!event) {
+        throw new AppError(404, "Event not found");
+    }
+
+    return event;
+}

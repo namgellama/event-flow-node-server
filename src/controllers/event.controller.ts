@@ -67,3 +67,17 @@ export async function updateEvent(
         next(error);
     }
 }
+
+export async function deleteEvent(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        await eventService.remove(req.params.id);
+
+        sendResponse(res, null, "Event deleted successfully");
+    } catch (error) {
+        next(error);
+    }
+}

@@ -22,5 +22,6 @@ router.patch(
     validateBody(updateEventSchema),
     eventController.updateEvent,
 );
+router.delete("/:id", protect, admin, eventController.deleteEvent);
 
 export default router;
