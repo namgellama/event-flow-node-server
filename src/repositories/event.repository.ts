@@ -2,7 +2,6 @@ import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { eventsTable } from "../db/schema";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
-import id from "zod/v4/locales/id.js";
 
 export async function getAll(limit: number, offset: number) {
     return await db

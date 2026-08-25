@@ -5,6 +5,7 @@ import {
     timestamp,
     uuid,
     varchar,
+    primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
@@ -38,3 +39,37 @@ export const eventsTable = pgTable("events", {
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export const eventRecipientStatusEnum = pgEnum("event_recipient_status", [
+    "PENDING",
+    "SENT",
+    "FAILED",
+]);
+export type EventRecipientStatus =
+    (typeof eventRecipientStatusEnum.enumValues)[number];
+
+export const eventRecipientsTable = pgTable(
+    "event_recipients",
+    {
+        eventId: uuid("event_id")
+            .notNull()
+            .references(() => eventsTable.id, {
+                onDelete: "cascade",
+            }),
+        userId: uuid("user_id")
+            .notNull()
+            .references(() => usersTable.id, {
+                onDelete: "cascade",
+            }),
+        providerMessageId: varchar("provider_message_id", {
+            length: 255,
+        }).notNull(),
+        status: eventRecipientStatusEnum("status").notNull().default("PENDING"),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+    },
+    (table) => [
+        primaryKey({
+            columns: [table.eventId, table.userId],
+        }),
+    ],
+);
