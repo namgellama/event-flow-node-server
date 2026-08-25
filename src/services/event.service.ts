@@ -36,13 +36,13 @@ export async function create(body: CreateEventInput) {
 }
 
 export async function update(id: string, body: UpdateEventInput) {
-    const event = await eventRepository.getById(id);
+    const event = await eventRepository.update(id, body);
 
     if (!event) {
         throw new AppError(404, "Event not found");
     }
 
-    return eventRepository.update(id, body);
+    return event;
 }
 
 export async function remove(id: string) {
