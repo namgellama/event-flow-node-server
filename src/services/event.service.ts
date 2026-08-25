@@ -1,3 +1,4 @@
+import { AppError } from "../errors/app-error";
 import * as eventRepository from "../repositories/event.repository";
 import { CreateEventInput } from "../schemas/event.schema";
 
@@ -18,6 +19,16 @@ export async function getAll(page: number, pageSize: number) {
             totalPages: Math.ceil(total / pageSize),
         },
     };
+}
+
+export async function getById(id: string) {
+    const event = await eventRepository.getById(id);
+
+    if (!event) {
+        throw new AppError(404, "Event not found");
+    }
+
+    return event;
 }
 
 export async function create(body: CreateEventInput) {

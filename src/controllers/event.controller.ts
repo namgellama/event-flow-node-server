@@ -26,6 +26,20 @@ export async function getAllEvents(
     }
 }
 
+export async function getEvent(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const event = await eventService.getById(req.params.id);
+
+        sendResponse(res, { event }, "Event fetched successfully");
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function createEvent(
     req: Request,
     res: Response,
