@@ -4,6 +4,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./errors/error-handler";
 import { notFound } from "./errors/not-found";
 import authRoutes from "./routes/auth.routes";
+import eventRecipientRoutes from "./routes/event-recipient.route";
 import eventRoutes from "./routes/event.routes";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get("/health", (_req: Request, res: Response) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/events/:id", eventRecipientRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
