@@ -15,7 +15,7 @@ export async function createEventRecipient(
 
         sendResponse(
             res,
-            { eventRecipient },
+            eventRecipient,
             "Event Recipient created successfully",
             201,
         );

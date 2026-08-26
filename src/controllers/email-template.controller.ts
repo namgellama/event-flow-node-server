@@ -8,7 +8,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 
         sendResponse(
             res,
-            { ...emailTemplate },
+            emailTemplate,
             "Email template created successfully",
             201,
         );

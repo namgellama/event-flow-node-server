@@ -34,7 +34,7 @@ export async function getEvent(
     try {
         const event = await eventService.getById(req.params.id);
 
-        sendResponse(res, { event }, "Event fetched successfully");
+        sendResponse(res, event, "Event fetched successfully");
     } catch (error) {
         next(error);
     }
@@ -48,7 +48,7 @@ export async function createEvent(
     try {
         const event = await eventService.create(req.body);
 
-        sendResponse(res, { event }, "Event created successfully", 201);
+        sendResponse(res, event, "Event created successfully", 201);
     } catch (error) {
         next(error);
     }
@@ -62,7 +62,7 @@ export async function updateEvent(
     try {
         const event = await eventService.update(req.params.id, req.body);
 
-        sendResponse(res, { event }, "Event updated successfully");
+        sendResponse(res, event, "Event updated successfully");
     } catch (error) {
         next(error);
     }

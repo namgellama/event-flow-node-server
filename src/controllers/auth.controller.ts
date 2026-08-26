@@ -11,7 +11,7 @@ export async function register(
     try {
         const newUser = await authService.register(req.body);
 
-        sendResponse(res, { newUser }, "User registered successfully", 201);
+        sendResponse(res, newUser, "User registered successfully", 201);
     } catch (error) {
         next(error);
     }
@@ -21,7 +21,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     try {
         const tokens = await authService.login(res, req.body);
 
-        sendResponse(res, { ...tokens }, "User logged in successfully");
+        sendResponse(res, tokens, "User logged in successfully");
     } catch (error) {
         next(error);
     }
@@ -52,7 +52,7 @@ export async function refreshToken(
 
         const accessToken = await authService.refreshToken(refreshToken);
 
-        sendResponse(res, { accessToken }, "Token refreshed successfully");
+        sendResponse(res, accessToken, "Token refreshed successfully");
     } catch (error) {
         next(error);
     }
@@ -62,7 +62,7 @@ export async function getMe(req: Request, res: Response, next: NextFunction) {
     try {
         const { password, ...user } = await authService.getMe(req.user!.id);
 
-        sendResponse(res, { user }, "Current user fetched successfully");
+        sendResponse(res, user, "Current user fetched successfully");
     } catch (error) {
         next(error);
     }
