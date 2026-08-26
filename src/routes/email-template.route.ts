@@ -6,12 +6,13 @@ import { createEmailTemplateSchema } from "../schemas/email-template.schema";
 
 const router = Router();
 
+router.get("/", protect, admin, emailTemplateController.getAllEmailTemplates);
 router.post(
     "/",
     protect,
     admin,
     validateBody(createEmailTemplateSchema),
-    emailTemplateController.create,
+    emailTemplateController.createEmailTemplate,
 );
 
 export default router;
