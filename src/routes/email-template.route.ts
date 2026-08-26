@@ -7,6 +7,7 @@ import { createEmailTemplateSchema } from "../schemas/email-template.schema";
 const router = Router();
 
 router.get("/", protect, admin, emailTemplateController.getAllEmailTemplates);
+router.get("/:id", protect, admin, emailTemplateController.getEmailTemplate);
 router.post(
     "/",
     protect,

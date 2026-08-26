@@ -20,6 +20,20 @@ export async function getAllEmailTemplates(
     }
 }
 
+export async function getEmailTemplate(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const emailTemplate = await emailTemplateService.getById(req.params.id);
+
+        sendResponse(res, emailTemplate, "Email Template fetched successfully");
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function createEmailTemplate(
     req: Request,
     res: Response,
