@@ -79,7 +79,7 @@ export const eventRecipientsTable = pgTable(
             }),
         providerMessageId: varchar("provider_message_id", {
             length: 255,
-        }).notNull(),
+        }),
         status: eventRecipientStatusEnum("status").notNull().default("PENDING"),
         createdAt: timestamp("created_at").notNull().defaultNow(),
     },

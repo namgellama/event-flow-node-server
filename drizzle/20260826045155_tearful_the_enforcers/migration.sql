@@ -1,0 +1,1 @@
+ALTER TABLE "event_recipients" ALTER COLUMN "provider_message_id" DROP NOT NULL;
