@@ -4,6 +4,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./errors/error-handler";
 import { notFound } from "./errors/not-found";
 import authRoutes from "./routes/auth.routes";
+import emailTemplateRoutes from "./routes/email-template.route";
 import eventRecipientRoutes from "./routes/event-recipient.route";
 import eventRoutes from "./routes/event.routes";
 
@@ -21,6 +22,7 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/events/:id", eventRecipientRoutes);
+app.use("/api/email-templates", emailTemplateRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
