@@ -6,6 +6,7 @@ import {
     uuid,
     varchar,
     primaryKey,
+    boolean,
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
@@ -36,6 +37,21 @@ export const eventsTable = pgTable("events", {
     description: text("description").notNull(),
     scheduledAt: timestamp("scheduled_at").notNull(),
     status: eventStatusEnum("status").notNull().default("SCHEDULED"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+
+    emailTemplateId: uuid("emailTemplateId").references(
+        () => emailTemplatesTable.id,
+    ),
+});
+
+export const emailTemplatesTable = pgTable("event_templates", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 255 }).notNull(),
+    sender: varchar("sender", { length: 255 }).notNull(),
+    subject: varchar("subject", { length: 500 }).notNull(),
+    html: text("html").notNull(),
+    isReusable: boolean("is_reusable").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
