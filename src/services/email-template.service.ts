@@ -28,3 +28,9 @@ export async function update(id: string, body: UpdateEmailTemplateInput) {
 
     return emailTemplateRepository.update(id, body);
 }
+
+export async function remove(id: string) {
+    await getById(id);
+
+    emailTemplateRepository.remove(id);
+}

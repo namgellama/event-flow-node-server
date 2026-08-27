@@ -69,3 +69,17 @@ export async function updateEmailTemplate(
         next(error);
     }
 }
+
+export async function deleteEmailTemplate(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        await emailTemplateService.remove(req.params.id);
+
+        sendResponse(res, null, "Email Template deleted successfully", 204);
+    } catch (error) {
+        next(error);
+    }
+}

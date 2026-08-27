@@ -37,3 +37,7 @@ export async function update(id: string, body: UpdateEmailTemplateInput) {
 
     return emailTemplate;
 }
+
+export async function remove(id: string) {
+    await db.delete(emailTemplatesTable).where(eq(emailTemplatesTable.id, id));
+}
