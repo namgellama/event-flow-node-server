@@ -52,3 +52,20 @@ export async function createEmailTemplate(
         next(error);
     }
 }
+
+export async function updateEmailTemplate(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+) {
+    try {
+        const emailTemplate = await emailTemplateService.update(
+            req.params.id,
+            req.body,
+        );
+
+        sendResponse(res, emailTemplate, "Email Template updated successfully");
+    } catch (error) {
+        next(error);
+    }
+}

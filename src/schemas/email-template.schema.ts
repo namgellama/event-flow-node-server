@@ -20,3 +20,9 @@ export const createEmailTemplateSchema = z.object({
 export type CreateEmailTemplateInput = z.infer<
     typeof createEmailTemplateSchema
 >;
+
+export const updateEmailTemplateSchema = createEmailTemplateSchema.partial();
+
+export type UpdateEmailTemplateInput = z.infer<
+    typeof updateEmailTemplateSchema
+>;

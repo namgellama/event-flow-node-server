@@ -1,6 +1,9 @@
-import { CreateEmailTemplateInput } from "../schemas/email-template.schema";
-import * as emailTemplateRepository from "../repositories/email-template.repository";
 import { AppError } from "../errors/app-error";
+import * as emailTemplateRepository from "../repositories/email-template.repository";
+import {
+    CreateEmailTemplateInput,
+    UpdateEmailTemplateInput,
+} from "../schemas/email-template.schema";
 
 export async function getAll() {
     return emailTemplateRepository.getAll();
@@ -18,4 +21,10 @@ export async function getById(id: string) {
 
 export async function create(body: CreateEmailTemplateInput) {
     return emailTemplateRepository.create(body);
+}
+
+export async function update(id: string, body: UpdateEmailTemplateInput) {
+    await getById(id);
+
+    return emailTemplateRepository.update(id, body);
 }
