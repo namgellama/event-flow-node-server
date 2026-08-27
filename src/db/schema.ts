@@ -5,6 +5,7 @@ import {
     timestamp,
     uuid,
     varchar,
+    jsonb,
     primaryKey,
     boolean,
 } from "drizzle-orm/pg-core";
@@ -37,6 +38,7 @@ export const eventsTable = pgTable("events", {
     description: text("description").notNull(),
     scheduledAt: timestamp("scheduled_at").notNull(),
     status: eventStatusEnum("status").notNull().default("SCHEDULED"),
+    context: jsonb("context"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
