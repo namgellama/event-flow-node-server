@@ -13,6 +13,7 @@ const envSchema = z.object({
     JWT_ACCESS_EXPIRY: z.string(),
     JWT_REFRESH_SECRET: z.string(),
     JWT_REFRESH_EXPIRY: z.string(),
+    RESEND_API_KEY: z.string(),
 });
 
 const parsed = envSchema.safeParse(process.env);
