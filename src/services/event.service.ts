@@ -1,6 +1,7 @@
 import { AppError } from "../errors/app-error";
 import * as eventRepository from "../repositories/event.repository";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
+import * as emailTemplateService from "../services/email-template.service";
 
 export async function getAll(page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
@@ -32,11 +33,19 @@ export async function getById(id: string) {
 }
 
 export async function create(body: CreateEventInput) {
+    if (body.emailTemplateId) {
+        await emailTemplateService.getById(body.emailTemplateId);
+    }
+
     return eventRepository.create(body);
 }
 
 export async function update(id: string, body: UpdateEventInput) {
     await getById(id);
+
+    if (body.emailTemplateId) {
+        await emailTemplateService.getById(body.emailTemplateId);
+    }
 
     return eventRepository.update(id, body);
 }
