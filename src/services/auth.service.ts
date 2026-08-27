@@ -17,7 +17,7 @@ export async function register(body: RegisterInput) {
 
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
-    return await userRepository.create({
+    return userRepository.create({
         ...body,
         password: hashedPassword,
         role: "USER",

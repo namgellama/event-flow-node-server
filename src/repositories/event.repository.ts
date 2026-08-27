@@ -47,10 +47,5 @@ export async function update(id: string, body: UpdateEventInput) {
 }
 
 export async function remove(id: string) {
-    const [event] = await db
-        .delete(eventsTable)
-        .where(eq(eventsTable.id, id))
-        .returning();
-
-    return event;
+    await db.delete(eventsTable).where(eq(eventsTable.id, id));
 }
