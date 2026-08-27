@@ -1,0 +1,1 @@
+ALTER TABLE "events" ALTER COLUMN "emailTemplateId" SET NOT NULL;
