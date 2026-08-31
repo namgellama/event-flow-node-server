@@ -1,6 +1,5 @@
 import cookieParser from "cookie-parser";
 import express, { Request, Response } from "express";
-import { env } from "./config/env";
 import { errorHandler } from "./errors/error-handler";
 import { notFound } from "./errors/not-found";
 import authRoutes from "./routes/auth.routes";
@@ -27,8 +26,4 @@ app.use("/api/email-templates", emailTemplateRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
-    console.log(
-        `Server running in ${env.NODE_ENV} environment on PORT ${env.PORT}`,
-    );
-});
+export default app;
