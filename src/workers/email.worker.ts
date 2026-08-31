@@ -16,6 +16,32 @@ export const emailWorker = new Worker("email-queue", sendEmail, {
     concurrency: 5,
 });
 
+emailWorker.on("completed", (job: Job) => {
+    console.log(`Job ${job.id} completed`);
+});
+
+emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
+    if (!job) return;
+
+    const { eventId, userId } = job.data;
+
+    console.error(`Email job ${job.id} failed:`, error.message);
+
+    if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
+        await db
+            .update(eventRecipientsTable)
+            .set({
+                status: "FAILED",
+            })
+            .where(
+                and(
+                    eq(eventRecipientsTable.eventId, eventId),
+                    eq(eventRecipientsTable.userId, userId),
+                ),
+            );
+    }
+});
+
 async function sendEmail(job: Job) {
     const { eventId, userId } = job.data;
 
