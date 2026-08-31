@@ -30,10 +30,12 @@ export async function getCount() {
 }
 
 export async function create(body: CreateEventInput) {
-    return await db
+    const [event] = await db
         .insert(eventsTable)
         .values({ ...body, status: "SCHEDULED" })
         .returning();
+
+    return event;
 }
 
 export async function update(id: string, body: UpdateEventInput) {

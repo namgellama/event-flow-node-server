@@ -1,4 +1,5 @@
 import { AppError } from "../errors/app-error";
+import { eventQueue } from "../queues/event.queue";
 import * as eventRepository from "../repositories/event.repository";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
 import * as emailTemplateService from "../services/email-template.service";
@@ -37,7 +38,34 @@ export async function create(body: CreateEventInput) {
         await emailTemplateService.getById(body.emailTemplateId);
     }
 
-    return eventRepository.create(body);
+    const event = await eventRepository.create(body);
+
+    if (event.emailTemplateId) {
+        const delay = event.scheduledAt.getTime() - Date.now();
+
+        // if (delay < 0) {
+        //     throw new AppError(400, "Scheduled time must be in the future");
+        // }
+
+        await eventQueue.add(
+            "process-event",
+            {
+                eventId: event.id,
+            },
+            {
+                delay: 15000,
+                attempts: 3,
+                backoff: {
+                    type: "exponential",
+                    delay: 1000,
+                },
+                removeOnComplete: true,
+                removeOnFail: false,
+            },
+        );
+    }
+
+    return event;
 }
 
 export async function update(id: string, body: UpdateEventInput) {
