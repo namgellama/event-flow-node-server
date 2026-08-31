@@ -4,6 +4,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "tsx --watch src/server.ts",
+        "worker": "tsx watch src/workers/index.ts",
         "db:generate": "npx drizzle-kit generate",
         "db:migrate": "npx drizzle-kit migrate",
         "db:seed": "npx tsx src/db/index.ts"
@@ -19,6 +20,7 @@
         "dotenv": "^17.4.2",
         "drizzle-orm": "^1.0.0-rc.4",
         "express": "^5.2.1",
+        "handlebars": "^4.7.9",
         "ioredis": "^6.0.0",
         "jsonwebtoken": "^9.0.3",
         "ms": "^2.1.3",

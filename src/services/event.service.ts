@@ -1,3 +1,4 @@
+import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
 import { eventQueue } from "../queues/event.queue";
 import * as eventRepository from "../repositories/event.repository";
@@ -43,9 +44,9 @@ export async function create(body: CreateEventInput) {
     if (event.emailTemplateId) {
         const delay = event.scheduledAt.getTime() - Date.now();
 
-        // if (delay < 0) {
-        //     throw new AppError(400, "Scheduled time must be in the future");
-        // }
+        if (env.NODE_ENV !== "development" && delay < 0) {
+            throw new AppError(400, "Scheduled time must be in the future");
+        }
 
         await eventQueue.add(
             "process-event",
@@ -53,7 +54,10 @@ export async function create(body: CreateEventInput) {
                 eventId: event.id,
             },
             {
-                delay: 15000,
+                delay:
+                    env.NODE_ENV === "development"
+                        ? env.EVENT_QUEUE_DELAY
+                        : delay,
                 attempts: 3,
                 backoff: {
                     type: "exponential",

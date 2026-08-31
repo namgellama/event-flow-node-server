@@ -1,8 +1,9 @@
 import { Job, Worker } from "bullmq";
+import { and, eq } from "drizzle-orm";
 import { redis } from "../config/redis";
 import { db } from "../db";
 import { eventRecipientsTable, eventsTable } from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { emailQueue } from "../queues/email.queue";
 
 export const eventWorker = new Worker(
     "event-queue",
@@ -45,6 +46,22 @@ export const eventWorker = new Worker(
         }
 
         // Fan out email jobs
+        await emailQueue.addBulk(
+            recipients.map((recipient) => ({
+                name: "send-email",
+                data: {
+                    eventId,
+                    userId: recipient.userId,
+                },
+                opts: {
+                    attempts: 3,
+                    backoff: {
+                        type: "exponential",
+                        delay: 1000,
+                    },
+                },
+            })),
+        );
 
         console.log(`Queued ${recipients.length} emails for event ${eventId}`);
     },

@@ -15,6 +15,7 @@ const envSchema = z.object({
     JWT_REFRESH_EXPIRY: z.string(),
     RESEND_API_KEY: z.string(),
     REDIS_URL: z.string(),
+    EVENT_QUEUE_DELAY: z.coerce.number().int().positive().default(60000),
 });
 
 const parsed = envSchema.safeParse(process.env);
