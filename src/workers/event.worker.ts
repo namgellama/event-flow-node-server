@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { redis } from "../config/redis";
 import { db } from "../db";
 import { eventRecipientsTable, eventsTable } from "../db/schema";
-import { emailQueue } from "../queues/email.queue";
+import { scheduleEmails } from "../queues/email.queue";
 
 export const eventWorker = new Worker("event-queue", processEvent, {
     connection: redis,
@@ -55,22 +55,7 @@ async function processEvent(job: Job) {
     }
 
     // Fan out email jobs
-    await emailQueue.addBulk(
-        recipients.map((recipient) => ({
-            name: "send-email",
-            data: {
-                eventId,
-                userId: recipient.userId,
-            },
-            opts: {
-                attempts: 3,
-                backoff: {
-                    type: "exponential",
-                    delay: 1000,
-                },
-            },
-        })),
-    );
+    await scheduleEmails(event.id, recipients);
 
     console.log(`Queued ${recipients.length} emails for event ${eventId}`);
 }

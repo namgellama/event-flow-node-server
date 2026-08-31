@@ -1,6 +1,6 @@
 import { env } from "../config/env";
 import { AppError } from "../errors/app-error";
-import { eventQueue } from "../queues/event.queue";
+import { scheduleEvent } from "../queues/event.queue";
 import * as eventRepository from "../repositories/event.repository";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
 import * as emailTemplateService from "../services/email-template.service";
@@ -39,34 +39,19 @@ export async function create(body: CreateEventInput) {
         await emailTemplateService.getById(body.emailTemplateId);
     }
 
+    const delay = body.scheduledAt.getTime() - Date.now();
+
+    if (env.NODE_ENV !== "development" && delay < 0) {
+        throw new AppError(400, "Scheduled time must be in the future");
+    }
+
     const event = await eventRepository.create(body);
 
     if (event.emailTemplateId) {
-        const delay = event.scheduledAt.getTime() - Date.now();
+        const queueDelay =
+            env.NODE_ENV === "development" ? env.EVENT_QUEUE_DELAY : delay;
 
-        if (env.NODE_ENV !== "development" && delay < 0) {
-            throw new AppError(400, "Scheduled time must be in the future");
-        }
-
-        await eventQueue.add(
-            "process-event",
-            {
-                eventId: event.id,
-            },
-            {
-                delay:
-                    env.NODE_ENV === "development"
-                        ? env.EVENT_QUEUE_DELAY
-                        : delay,
-                attempts: 3,
-                backoff: {
-                    type: "exponential",
-                    delay: 1000,
-                },
-                removeOnComplete: true,
-                removeOnFail: false,
-            },
-        );
+        await scheduleEvent(event.id, queueDelay);
     }
 
     return event;
