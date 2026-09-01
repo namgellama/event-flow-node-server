@@ -14,8 +14,19 @@ eventWorker.on("completed", (job: Job) => {
     console.log(`Job ${job.id} completed`);
 });
 
-eventWorker.on("failed", (job: Job | undefined, error: Error) => {
-    console.error(`Job ${job?.id} failed:`, error);
+eventWorker.on("failed", async (job: Job | undefined, error: Error) => {
+    if (!job) return;
+
+    console.error(`Job ${job.id} failed:`, error.message);
+
+    if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
+        const { eventId } = job.data;
+
+        await db
+            .update(eventsTable)
+            .set({ status: "FAILED", updatedAt: new Date() })
+            .where(eq(eventsTable.id, eventId));
+    }
 });
 
 async function processEvent(job: Job) {
@@ -50,7 +61,13 @@ async function processEvent(job: Job) {
         .where(eq(eventRecipientsTable.eventId, eventId));
 
     if (recipients.length === 0) {
-        console.log(`No recipients found for event ${eventId}`);
+        await db
+            .update(eventsTable)
+            .set({
+                status: "COMPLETED",
+                updatedAt: new Date(),
+            })
+            .where(eq(eventsTable.id, eventId));
         return;
     }
 
