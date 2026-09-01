@@ -1,14 +1,14 @@
 import { Job, Worker } from "bullmq";
 import { redis } from "../config/redis";
-import { resend } from "../config/resend";
 import * as emailTemplateRepository from "../repositories/email-template.repository";
 import * as eventRecipientRepository from "../repositories/event-recipient.repository";
 import * as eventRepository from "../repositories/event.repository";
 import * as userRepository from "../repositories/user.repository";
-import { renderTemplate } from "../utils/template-renderer";
+import { renderTemplate } from "../utils/render-template";
+import { sendEmail } from "../utils/send-email";
 import { completeEventIfDone } from "./event.worker";
 
-export const emailWorker = new Worker("email-queue", sendEmail, {
+export const emailWorker = new Worker("email-queue", processEmail, {
     connection: redis,
     concurrency: 5,
 });
@@ -31,7 +31,7 @@ emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
     }
 });
 
-async function sendEmail(job: Job) {
+async function processEmail(job: Job) {
     const { eventId, userId } = job.data;
 
     console.log(`Sending email for event ${eventId} to recipient ${userId}`);
@@ -90,7 +90,7 @@ async function sendEmail(job: Job) {
     const html = renderTemplate(emailTemplate.html, context);
 
     // Send email
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendEmail({
         from: emailTemplate.sender,
         to: user.email,
         subject,
