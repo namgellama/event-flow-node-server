@@ -60,6 +60,7 @@ export const emailTemplatesTable = pgTable("event_templates", {
 
 export const eventRecipientStatusEnum = pgEnum("event_recipient_status", [
     "PENDING",
+    "SENDING",
     "SENT",
     "FAILED",
 ]);
