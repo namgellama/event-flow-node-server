@@ -10,6 +10,7 @@ import {
     usersTable,
 } from "../db/schema";
 import { renderTemplate } from "../utils/template-renderer";
+import { completeEventIfDone } from "./event.worker";
 
 export const emailWorker = new Worker("email-queue", sendEmail, {
     connection: redis,
@@ -39,6 +40,8 @@ emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
                     eq(eventRecipientsTable.userId, userId),
                 ),
             );
+
+        await completeEventIfDone(eventId);
     }
 });
 
@@ -59,9 +62,26 @@ async function sendEmail(job: Job) {
         );
 
     if (!eventRecipient) {
-        console.log("Event recipient not found");
+        throw new Error(`Event recipient not found: ${eventId}/${userId}`);
+    }
+
+    if (eventRecipient.status === "SENT") {
+        console.log(`Email already sent to ${userId}`);
         return;
     }
+
+    await db
+        .update(eventRecipientsTable)
+        .set({
+            status: "SENDING",
+        })
+        .where(
+            and(
+                eq(eventRecipientsTable.eventId, eventId),
+                eq(eventRecipientsTable.userId, userId),
+                eq(eventRecipientsTable.status, "PENDING"),
+            ),
+        );
 
     // Get user
     const [user] = await db
@@ -70,8 +90,7 @@ async function sendEmail(job: Job) {
         .where(eq(usersTable.id, userId));
 
     if (!user) {
-        console.log("User not found");
-        return;
+        throw new Error(`User not found: ${userId}`);
     }
 
     // Get event
@@ -81,8 +100,7 @@ async function sendEmail(job: Job) {
         .where(eq(eventsTable.id, eventId));
 
     if (!event) {
-        console.log("Event not found");
-        return;
+        throw new Error(`Event not found: ${eventId}`);
     }
 
     if (!event.emailTemplateId) {
@@ -96,8 +114,7 @@ async function sendEmail(job: Job) {
         .where(eq(emailTemplatesTable.id, event.emailTemplateId));
 
     if (!emailTemplate) {
-        console.log(`Email template ${event.emailTemplateId} not found`);
-        throw new Error("Email template not found");
+        throw new Error(`Email template not found: ${event.emailTemplateId}`);
     }
 
     const context = {
@@ -136,4 +153,6 @@ async function sendEmail(job: Job) {
         );
 
     console.log(`Email sent to ${user.email}`);
+
+    await completeEventIfDone(eventId);
 }

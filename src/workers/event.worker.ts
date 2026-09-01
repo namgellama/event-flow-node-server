@@ -1,5 +1,5 @@
 import { Job, Worker } from "bullmq";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { redis } from "../config/redis";
 import { db } from "../db";
 import { eventRecipientsTable, eventsTable } from "../db/schema";
@@ -75,4 +75,30 @@ async function processEvent(job: Job) {
     await scheduleEmails(event.id, recipients);
 
     console.log(`Queued ${recipients.length} emails for event ${eventId}`);
+}
+
+export async function completeEventIfDone(eventId: string) {
+    const [result] = await db
+        .select({ count: count() })
+        .from(eventRecipientsTable)
+        .where(
+            and(
+                eq(eventRecipientsTable.eventId, eventId),
+                inArray(eventRecipientsTable.status, ["PENDING", "SENDING"]),
+            ),
+        );
+
+    if (result.count > 0) {
+        return;
+    }
+
+    await db
+        .update(eventsTable)
+        .set({ status: "COMPLETED", updatedAt: new Date() })
+        .where(
+            and(
+                eq(eventsTable.id, eventId),
+                eq(eventsTable.status, "PROCESSING"),
+            ),
+        );
 }
