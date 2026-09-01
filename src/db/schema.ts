@@ -1,14 +1,15 @@
 import {
+    boolean,
+    jsonb,
     pgEnum,
     pgTable,
+    primaryKey,
     text,
     timestamp,
     uuid,
     varchar,
-    jsonb,
-    primaryKey,
-    boolean,
 } from "drizzle-orm/pg-core";
+import { EventContext } from "../types/event";
 
 export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
 export type Role = (typeof roleEnum.enumValues)[number];
@@ -38,7 +39,7 @@ export const eventsTable = pgTable("events", {
     description: text("description").notNull(),
     scheduledAt: timestamp("scheduled_at").notNull(),
     status: eventStatusEnum("status").notNull().default("SCHEDULED"),
-    context: jsonb("context"),
+    context: jsonb("context").$type<EventContext>().default({}),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
