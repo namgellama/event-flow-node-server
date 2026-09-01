@@ -2,7 +2,7 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { eventRecipientsTable } from "../db/schema";
 
-export async function getById(eventId: string, userId: string) {
+export async function findByEventAndUser(eventId: string, userId: string) {
     const [eventRecipient] = await db
         .select()
         .from(eventRecipientsTable)

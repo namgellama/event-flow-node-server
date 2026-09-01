@@ -26,7 +26,9 @@ export async function getEmailTemplate(
     next: NextFunction,
 ) {
     try {
-        const emailTemplate = await emailTemplateService.getById(req.params.id);
+        const emailTemplate = await emailTemplateService.findById(
+            req.params.id,
+        );
 
         sendResponse(res, emailTemplate, "Email Template fetched successfully");
     } catch (error) {

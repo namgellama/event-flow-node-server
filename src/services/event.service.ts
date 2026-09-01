@@ -24,8 +24,8 @@ export async function getAll(page: number, pageSize: number) {
     };
 }
 
-export async function getById(id: string) {
-    const event = await eventRepository.getById(id);
+export async function findById(eventId: string) {
+    const event = await eventRepository.findById(eventId);
 
     if (!event) {
         throw new AppError(404, "Event not found");
@@ -36,7 +36,7 @@ export async function getById(id: string) {
 
 export async function create(body: CreateEventInput) {
     if (body.emailTemplateId) {
-        await emailTemplateService.getById(body.emailTemplateId);
+        await emailTemplateService.findById(body.emailTemplateId);
     }
 
     const delay = body.scheduledAt.getTime() - Date.now();
@@ -57,18 +57,18 @@ export async function create(body: CreateEventInput) {
     return event;
 }
 
-export async function update(id: string, body: UpdateEventInput) {
-    await getById(id);
+export async function update(eventId: string, body: UpdateEventInput) {
+    await findById(eventId);
 
     if (body.emailTemplateId) {
-        await emailTemplateService.getById(body.emailTemplateId);
+        await emailTemplateService.findById(body.emailTemplateId);
     }
 
-    return eventRepository.update(id, body);
+    return eventRepository.update(eventId, body);
 }
 
-export async function remove(id: string) {
-    await getById(id);
+export async function remove(eventId: string) {
+    await findById(eventId);
 
-    eventRepository.remove(id);
+    eventRepository.remove(eventId);
 }

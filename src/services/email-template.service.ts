@@ -9,8 +9,9 @@ export async function getAll() {
     return emailTemplateRepository.getAll();
 }
 
-export async function getById(id: string) {
-    const emailTemplate = await emailTemplateRepository.getById(id);
+export async function findById(emailTemplateId: string) {
+    const emailTemplate =
+        await emailTemplateRepository.findById(emailTemplateId);
 
     if (!emailTemplate) {
         throw new AppError(404, "Email template not found");
@@ -23,14 +24,17 @@ export async function create(body: CreateEmailTemplateInput) {
     return emailTemplateRepository.create(body);
 }
 
-export async function update(id: string, body: UpdateEmailTemplateInput) {
-    await getById(id);
+export async function update(
+    emailTemplateId: string,
+    body: UpdateEmailTemplateInput,
+) {
+    await findById(emailTemplateId);
 
-    return emailTemplateRepository.update(id, body);
+    return emailTemplateRepository.update(emailTemplateId, body);
 }
 
-export async function remove(id: string) {
-    await getById(id);
+export async function remove(emailTemplateId: string) {
+    await findById(emailTemplateId);
 
-    emailTemplateRepository.remove(id);
+    emailTemplateRepository.remove(emailTemplateId);
 }

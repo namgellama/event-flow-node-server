@@ -3,9 +3,12 @@ import * as eventRecipientRepository from "../repositories/event-recipient.repos
 import * as eventService from "../services/event.service";
 
 export async function create(eventId: string, userId: string) {
-    await eventService.getById(eventId);
+    await eventService.findById(eventId);
 
-    const existing = await eventRecipientRepository.getById(eventId, userId);
+    const existing = await eventRecipientRepository.findByEventAndUser(
+        eventId,
+        userId,
+    );
 
     if (existing) {
         throw new AppError(409, "User is already a recipient of this event");

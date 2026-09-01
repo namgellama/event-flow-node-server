@@ -12,13 +12,13 @@ export async function getAll(limit: number, offset: number) {
         .offset(offset);
 }
 
-export async function getById(id: string) {
-    const result = await db
+export async function findById(eventId: string) {
+    const [event] = await db
         .select()
         .from(eventsTable)
-        .where(eq(eventsTable.id, id));
+        .where(eq(eventsTable.id, eventId));
 
-    return result[0] ?? null;
+    return event ?? null;
 }
 
 export async function getCount() {
@@ -48,17 +48,22 @@ export async function update(id: string, body: UpdateEventInput) {
     return event;
 }
 
-export async function remove(id: string) {
-    await db.delete(eventsTable).where(eq(eventsTable.id, id));
+export async function remove(eventId: string) {
+    await db.delete(eventsTable).where(eq(eventsTable.id, eventId));
 }
 
-export async function claimEvent(id: string) {
+export async function claimEvent(eventId: string) {
     const [event] = await db
         .update(eventsTable)
         .set({
             status: "PROCESSING",
         })
-        .where(and(eq(eventsTable.id, id), eq(eventsTable.status, "SCHEDULED")))
+        .where(
+            and(
+                eq(eventsTable.id, eventId),
+                eq(eventsTable.status, "SCHEDULED"),
+            ),
+        )
         .returning();
 
     return event;

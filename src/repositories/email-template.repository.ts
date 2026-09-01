@@ -10,11 +10,11 @@ export async function getAll() {
     return db.select().from(emailTemplatesTable);
 }
 
-export async function getById(id: string) {
+export async function findById(emailTemplateId: string) {
     const [emailTemplate] = await db
         .select()
         .from(emailTemplatesTable)
-        .where(eq(emailTemplatesTable.id, id));
+        .where(eq(emailTemplatesTable.id, emailTemplateId));
 
     return emailTemplate;
 }
@@ -28,16 +28,21 @@ export async function create(body: CreateEmailTemplateInput) {
     return emailTemplate;
 }
 
-export async function update(id: string, body: UpdateEmailTemplateInput) {
+export async function update(
+    emailTemplateId: string,
+    body: UpdateEmailTemplateInput,
+) {
     const [emailTemplate] = await db
         .update(emailTemplatesTable)
         .set({ ...body, updatedAt: new Date() })
-        .where(eq(emailTemplatesTable.id, id))
+        .where(eq(emailTemplatesTable.id, emailTemplateId))
         .returning();
 
     return emailTemplate;
 }
 
-export async function remove(id: string) {
-    await db.delete(emailTemplatesTable).where(eq(emailTemplatesTable.id, id));
+export async function remove(emailTemplateId: string) {
+    await db
+        .delete(emailTemplatesTable)
+        .where(eq(emailTemplatesTable.id, emailTemplateId));
 }

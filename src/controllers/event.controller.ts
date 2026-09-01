@@ -32,7 +32,7 @@ export async function getEvent(
     next: NextFunction,
 ) {
     try {
-        const event = await eventService.getById(req.params.id);
+        const event = await eventService.findById(req.params.id);
 
         sendResponse(res, event, "Event fetched successfully");
     } catch (error) {

@@ -7,21 +7,21 @@ import { User } from "../types/user";
 export type UserCreate = RegisterInput & { role: Role };
 
 export async function findByEmail(email: string): Promise<User | null> {
-    const result = await db
+    const [user] = await db
         .select()
         .from(usersTable)
         .where(eq(usersTable.email, email));
 
-    return result[0] ?? null;
+    return user ?? null;
 }
 
-export async function findById(id: string): Promise<User | null> {
-    const result = await db
+export async function findById(userId: string): Promise<User | null> {
+    const [user] = await db
         .select()
         .from(usersTable)
-        .where(eq(usersTable.id, id));
+        .where(eq(usersTable.id, userId));
 
-    return result[0] ?? null;
+    return user ?? null;
 }
 
 export async function create(body: UserCreate) {

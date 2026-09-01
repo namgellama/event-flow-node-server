@@ -37,7 +37,7 @@ async function processEmail(job: Job) {
     console.log(`Sending email for event ${eventId} to recipient ${userId}`);
 
     // Get recipient
-    const eventRecipient = await eventRecipientRepository.getById(
+    const eventRecipient = await eventRecipientRepository.findByEventAndUser(
         eventId,
         userId,
     );
@@ -61,7 +61,7 @@ async function processEmail(job: Job) {
     }
 
     // Get event
-    const event = await eventRepository.getById(eventId);
+    const event = await eventRepository.findById(eventId);
 
     if (!event) {
         throw new Error(`Event not found: ${eventId}`);
@@ -72,7 +72,7 @@ async function processEmail(job: Job) {
     }
 
     // Get email template
-    const emailTemplate = await emailTemplateRepository.getById(
+    const emailTemplate = await emailTemplateRepository.findById(
         event.emailTemplateId,
     );
 
