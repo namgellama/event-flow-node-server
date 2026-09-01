@@ -1,14 +1,10 @@
 import { Job, Worker } from "bullmq";
-import { and, eq } from "drizzle-orm";
 import { redis } from "../config/redis";
 import { resend } from "../config/resend";
-import { db } from "../db";
-import {
-    emailTemplatesTable,
-    eventRecipientsTable,
-    eventsTable,
-    usersTable,
-} from "../db/schema";
+import * as emailTemplateRepository from "../repositories/email-template.repository";
+import * as eventRecipientRepository from "../repositories/event-recipient.repository";
+import * as eventRepository from "../repositories/event.repository";
+import * as userRepository from "../repositories/user.repository";
 import { renderTemplate } from "../utils/template-renderer";
 import { completeEventIfDone } from "./event.worker";
 
@@ -29,17 +25,7 @@ emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
     console.error(`Email job ${job.id} failed:`, error.message);
 
     if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
-        await db
-            .update(eventRecipientsTable)
-            .set({
-                status: "FAILED",
-            })
-            .where(
-                and(
-                    eq(eventRecipientsTable.eventId, eventId),
-                    eq(eventRecipientsTable.userId, userId),
-                ),
-            );
+        await eventRecipientRepository.markFailed(eventId, userId);
 
         await completeEventIfDone(eventId);
     }
@@ -51,15 +37,10 @@ async function sendEmail(job: Job) {
     console.log(`Sending email for event ${eventId} to recipient ${userId}`);
 
     // Get recipient
-    const [eventRecipient] = await db
-        .select()
-        .from(eventRecipientsTable)
-        .where(
-            and(
-                eq(eventRecipientsTable.eventId, eventId),
-                eq(eventRecipientsTable.userId, userId),
-            ),
-        );
+    const eventRecipient = await eventRecipientRepository.getById(
+        eventId,
+        userId,
+    );
 
     if (!eventRecipient) {
         throw new Error(`Event recipient not found: ${eventId}/${userId}`);
@@ -70,34 +51,17 @@ async function sendEmail(job: Job) {
         return;
     }
 
-    await db
-        .update(eventRecipientsTable)
-        .set({
-            status: "SENDING",
-        })
-        .where(
-            and(
-                eq(eventRecipientsTable.eventId, eventId),
-                eq(eventRecipientsTable.userId, userId),
-                eq(eventRecipientsTable.status, "PENDING"),
-            ),
-        );
+    await eventRecipientRepository.markSending(eventId, userId);
 
     // Get user
-    const [user] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.id, userId));
+    const user = await userRepository.findById(userId);
 
     if (!user) {
         throw new Error(`User not found: ${userId}`);
     }
 
     // Get event
-    const [event] = await db
-        .select()
-        .from(eventsTable)
-        .where(eq(eventsTable.id, eventId));
+    const event = await eventRepository.getById(eventId);
 
     if (!event) {
         throw new Error(`Event not found: ${eventId}`);
@@ -108,10 +72,9 @@ async function sendEmail(job: Job) {
     }
 
     // Get email template
-    const [emailTemplate] = await db
-        .select()
-        .from(emailTemplatesTable)
-        .where(eq(emailTemplatesTable.id, event.emailTemplateId));
+    const emailTemplate = await emailTemplateRepository.getById(
+        event.emailTemplateId,
+    );
 
     if (!emailTemplate) {
         throw new Error(`Email template not found: ${event.emailTemplateId}`);
@@ -139,18 +102,9 @@ async function sendEmail(job: Job) {
     }
 
     // Update recipient
-    await db
-        .update(eventRecipientsTable)
-        .set({
-            status: "SENT",
-            providerMessageId: data?.id,
-        })
-        .where(
-            and(
-                eq(eventRecipientsTable.eventId, eventId),
-                eq(eventRecipientsTable.userId, userId),
-            ),
-        );
+    await eventRecipientRepository.markSent(eventId, userId, {
+        providerMessageId: data.id,
+    });
 
     console.log(`Email sent to ${user.email}`);
 

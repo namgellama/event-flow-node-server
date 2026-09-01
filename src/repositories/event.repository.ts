@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { eventsTable } from "../db/schema";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
@@ -50,4 +50,35 @@ export async function update(id: string, body: UpdateEventInput) {
 
 export async function remove(id: string) {
     await db.delete(eventsTable).where(eq(eventsTable.id, id));
+}
+
+export async function claimEvent(id: string) {
+    const [event] = await db
+        .update(eventsTable)
+        .set({
+            status: "PROCESSING",
+        })
+        .where(and(eq(eventsTable.id, id), eq(eventsTable.status, "SCHEDULED")))
+        .returning();
+
+    return event;
+}
+
+export async function markCompleted(eventId: string) {
+    await db
+        .update(eventsTable)
+        .set({ status: "COMPLETED", updatedAt: new Date() })
+        .where(
+            and(
+                eq(eventsTable.id, eventId),
+                eq(eventsTable.status, "PROCESSING"),
+            ),
+        );
+}
+
+export async function markFailed(eventId: string) {
+    await db
+        .update(eventsTable)
+        .set({ status: "FAILED", updatedAt: new Date() })
+        .where(eq(eventsTable.id, eventId));
 }

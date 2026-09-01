@@ -1,9 +1,8 @@
 import { Job, Worker } from "bullmq";
-import { and, count, eq, inArray } from "drizzle-orm";
 import { redis } from "../config/redis";
-import { db } from "../db";
-import { eventRecipientsTable, eventsTable } from "../db/schema";
 import { scheduleEmails } from "../queues/email.queue";
+import * as eventRecipientRepository from "../repositories/event-recipient.repository";
+import * as eventRepository from "../repositories/event.repository";
 
 export const eventWorker = new Worker("event-queue", processEvent, {
     connection: redis,
@@ -22,10 +21,7 @@ eventWorker.on("failed", async (job: Job | undefined, error: Error) => {
     if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
         const { eventId } = job.data;
 
-        await db
-            .update(eventsTable)
-            .set({ status: "FAILED", updatedAt: new Date() })
-            .where(eq(eventsTable.id, eventId));
+        await eventRepository.markFailed(eventId);
     }
 });
 
@@ -35,18 +31,7 @@ async function processEvent(job: Job) {
     console.log(`Processing event: ${eventId}`);
 
     // Claim the event
-    const [event] = await db
-        .update(eventsTable)
-        .set({
-            status: "PROCESSING",
-        })
-        .where(
-            and(
-                eq(eventsTable.id, eventId),
-                eq(eventsTable.status, "SCHEDULED"),
-            ),
-        )
-        .returning();
+    const event = await eventRepository.claimEvent(eventId);
 
     // Already processed/claimed
     if (!event) {
@@ -55,19 +40,10 @@ async function processEvent(job: Job) {
     }
 
     // Get all recipients
-    const recipients = await db
-        .select()
-        .from(eventRecipientsTable)
-        .where(eq(eventRecipientsTable.eventId, eventId));
+    const recipients = await eventRecipientRepository.getByEventId(eventId);
 
     if (recipients.length === 0) {
-        await db
-            .update(eventsTable)
-            .set({
-                status: "COMPLETED",
-                updatedAt: new Date(),
-            })
-            .where(eq(eventsTable.id, eventId));
+        await eventRepository.markCompleted(eventId);
         return;
     }
 
@@ -78,27 +54,10 @@ async function processEvent(job: Job) {
 }
 
 export async function completeEventIfDone(eventId: string) {
-    const [result] = await db
-        .select({ count: count() })
-        .from(eventRecipientsTable)
-        .where(
-            and(
-                eq(eventRecipientsTable.eventId, eventId),
-                inArray(eventRecipientsTable.status, ["PENDING", "SENDING"]),
-            ),
-        );
+    const hasPending =
+        await eventRecipientRepository.hasPendingRecipients(eventId);
 
-    if (result.count > 0) {
-        return;
+    if (!hasPending) {
+        await eventRepository.markCompleted(eventId);
     }
-
-    await db
-        .update(eventsTable)
-        .set({ status: "COMPLETED", updatedAt: new Date() })
-        .where(
-            and(
-                eq(eventsTable.id, eventId),
-                eq(eventsTable.status, "PROCESSING"),
-            ),
-        );
 }
