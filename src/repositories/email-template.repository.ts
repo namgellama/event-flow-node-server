@@ -5,21 +5,26 @@ import {
     CreateEmailTemplateInput,
     UpdateEmailTemplateInput,
 } from "../schemas/email-template.schema";
+import { EmailTemplate } from "../types/email-template";
 
-export async function getAll() {
+export async function getAll(): Promise<EmailTemplate[]> {
     return db.select().from(emailTemplatesTable);
 }
 
-export async function findById(emailTemplateId: string) {
+export async function findById(
+    emailTemplateId: string,
+): Promise<EmailTemplate | null> {
     const [emailTemplate] = await db
         .select()
         .from(emailTemplatesTable)
         .where(eq(emailTemplatesTable.id, emailTemplateId));
 
-    return emailTemplate;
+    return emailTemplate ?? null;
 }
 
-export async function create(body: CreateEmailTemplateInput) {
+export async function create(
+    body: CreateEmailTemplateInput,
+): Promise<EmailTemplate> {
     const [emailTemplate] = await db
         .insert(emailTemplatesTable)
         .values(body)
@@ -31,7 +36,7 @@ export async function create(body: CreateEmailTemplateInput) {
 export async function update(
     emailTemplateId: string,
     body: UpdateEmailTemplateInput,
-) {
+): Promise<EmailTemplate> {
     const [emailTemplate] = await db
         .update(emailTemplatesTable)
         .set({ ...body, updatedAt: new Date() })
@@ -41,7 +46,7 @@ export async function update(
     return emailTemplate;
 }
 
-export async function remove(emailTemplateId: string) {
+export async function remove(emailTemplateId: string): Promise<void> {
     await db
         .delete(emailTemplatesTable)
         .where(eq(emailTemplatesTable.id, emailTemplateId));

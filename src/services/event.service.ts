@@ -4,8 +4,12 @@ import { scheduleEvent } from "../queues/event.queue";
 import * as eventRepository from "../repositories/event.repository";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
 import * as emailTemplateService from "../services/email-template.service";
+import { Event, PaginatedEvent } from "../types/event";
 
-export async function getAll(page: number, pageSize: number) {
+export async function getAll(
+    page: number,
+    pageSize: number,
+): Promise<PaginatedEvent> {
     const offset = (page - 1) * pageSize;
 
     const [events, total] = await Promise.all([
@@ -24,7 +28,7 @@ export async function getAll(page: number, pageSize: number) {
     };
 }
 
-export async function findById(eventId: string) {
+export async function findById(eventId: string): Promise<Event> {
     const event = await eventRepository.findById(eventId);
 
     if (!event) {
@@ -34,7 +38,7 @@ export async function findById(eventId: string) {
     return event;
 }
 
-export async function create(body: CreateEventInput) {
+export async function create(body: CreateEventInput): Promise<Event> {
     if (body.emailTemplateId) {
         await emailTemplateService.findById(body.emailTemplateId);
     }
@@ -57,7 +61,10 @@ export async function create(body: CreateEventInput) {
     return event;
 }
 
-export async function update(eventId: string, body: UpdateEventInput) {
+export async function update(
+    eventId: string,
+    body: UpdateEventInput,
+): Promise<Event> {
     await findById(eventId);
 
     if (body.emailTemplateId) {
@@ -67,7 +74,7 @@ export async function update(eventId: string, body: UpdateEventInput) {
     return eventRepository.update(eventId, body);
 }
 
-export async function remove(eventId: string) {
+export async function remove(eventId: string): Promise<void> {
     await findById(eventId);
 
     eventRepository.remove(eventId);

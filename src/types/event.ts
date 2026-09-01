@@ -13,3 +13,13 @@ export type Event = {
     emailTemplateId: string | null;
     context: EventContext | null;
 };
+
+export type PaginatedEvent = {
+    events: Event[];
+    pagination: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+    };
+};

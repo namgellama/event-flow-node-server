@@ -1,8 +1,12 @@
 import { and, count, eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { eventRecipientsTable } from "../db/schema";
+import { EventRecipient } from "../types/event-recipient";
 
-export async function findByEventAndUser(eventId: string, userId: string) {
+export async function findByEventAndUser(
+    eventId: string,
+    userId: string,
+): Promise<EventRecipient | null> {
     const [eventRecipient] = await db
         .select()
         .from(eventRecipientsTable)
@@ -13,10 +17,13 @@ export async function findByEventAndUser(eventId: string, userId: string) {
             ),
         );
 
-    return eventRecipient;
+    return eventRecipient ?? null;
 }
 
-export async function create(eventId: string, userId: string) {
+export async function create(
+    eventId: string,
+    userId: string,
+): Promise<EventRecipient> {
     const [eventRecipient] = await db
         .insert(eventRecipientsTable)
         .values({ eventId, userId })
@@ -25,14 +32,14 @@ export async function create(eventId: string, userId: string) {
     return eventRecipient;
 }
 
-export async function getByEventId(eventId: string) {
+export async function getByEventId(eventId: string): Promise<EventRecipient[]> {
     return db
         .select()
         .from(eventRecipientsTable)
         .where(eq(eventRecipientsTable.eventId, eventId));
 }
 
-export async function hasPendingRecipients(eventId: string) {
+export async function hasPendingRecipients(eventId: string): Promise<boolean> {
     const [result] = await db
         .select({ count: count() })
         .from(eventRecipientsTable)
@@ -46,7 +53,10 @@ export async function hasPendingRecipients(eventId: string) {
     return result.count > 0;
 }
 
-export async function markSending(eventId: string, userId: string) {
+export async function markSending(
+    eventId: string,
+    userId: string,
+): Promise<void> {
     await db
         .update(eventRecipientsTable)
         .set({
@@ -65,7 +75,7 @@ export async function markSent(
     eventId: string,
     userId: string,
     data: { providerMessageId: string | undefined },
-) {
+): Promise<void> {
     await db
         .update(eventRecipientsTable)
         .set({
@@ -80,7 +90,10 @@ export async function markSent(
         );
 }
 
-export async function markFailed(eventId: string, userId: string) {
+export async function markFailed(
+    eventId: string,
+    userId: string,
+): Promise<void> {
     await db
         .update(eventRecipientsTable)
         .set({

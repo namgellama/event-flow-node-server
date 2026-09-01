@@ -24,8 +24,10 @@ export async function findById(userId: string): Promise<User | null> {
     return user ?? null;
 }
 
-export async function create(body: UserCreate) {
-    return await db.insert(usersTable).values(body).returning({
+export async function create(
+    body: UserCreate,
+): Promise<Omit<User, "password">> {
+    const [user] = await db.insert(usersTable).values(body).returning({
         id: usersTable.id,
         name: usersTable.name,
         email: usersTable.email,
@@ -33,4 +35,6 @@ export async function create(body: UserCreate) {
         createdAt: usersTable.createdAt,
         updatedAt: usersTable.updatedAt,
     });
+
+    return user;
 }

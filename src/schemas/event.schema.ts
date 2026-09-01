@@ -5,7 +5,7 @@ export const createEventSchema = z.object({
     description: z
         .string()
         .min(3, "Description must be at least 3 characters long"),
-    context: z.json().nullable(),
+    context: z.record(z.string(), z.unknown()).nullable(),
     emailTemplateId: z.uuid().nullable(),
     scheduledAt: z.coerce.date(),
 });

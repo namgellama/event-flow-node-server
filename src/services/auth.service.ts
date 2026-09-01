@@ -8,7 +8,9 @@ import { LoginInput, RegisterInput } from "../schemas/auth.schema";
 import { User } from "../types/user";
 import { signToken, verifyToken } from "../utils/jwt";
 
-export async function register(body: RegisterInput) {
+export async function register(
+    body: RegisterInput,
+): Promise<Omit<User, "password">> {
     const existing = await userRepository.findByEmail(body.email);
 
     if (existing) {
@@ -24,7 +26,10 @@ export async function register(body: RegisterInput) {
     });
 }
 
-export async function login(res: Response, body: LoginInput) {
+export async function login(
+    res: Response,
+    body: LoginInput,
+): Promise<{ accessToken: string; refreshToken: string }> {
     const existing = await userRepository.findByEmail(body.email);
 
     if (!existing) {
@@ -58,11 +63,11 @@ export async function login(res: Response, body: LoginInput) {
     return { accessToken, refreshToken };
 }
 
-export async function logout(res: Response) {
+export async function logout(res: Response): Promise<void> {
     res.clearCookie("refreshToken");
 }
 
-export async function refreshToken(token: string) {
+export async function refreshToken(token: string): Promise<string> {
     const payload = verifyToken(token, env.JWT_REFRESH_SECRET);
 
     const user = await userRepository.findById(payload.sub);

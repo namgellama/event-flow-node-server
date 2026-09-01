@@ -2,8 +2,9 @@ import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { eventsTable } from "../db/schema";
 import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
+import { Event } from "../types/event";
 
-export async function getAll(limit: number, offset: number) {
+export async function getAll(limit: number, offset: number): Promise<Event[]> {
     return await db
         .select()
         .from(eventsTable)
@@ -12,7 +13,7 @@ export async function getAll(limit: number, offset: number) {
         .offset(offset);
 }
 
-export async function findById(eventId: string) {
+export async function findById(eventId: string): Promise<Event | null> {
     const [event] = await db
         .select()
         .from(eventsTable)
@@ -21,7 +22,7 @@ export async function findById(eventId: string) {
     return event ?? null;
 }
 
-export async function getCount() {
+export async function getCount(): Promise<number> {
     const result = await db
         .select({ count: count(eventsTable.id) })
         .from(eventsTable);
@@ -29,7 +30,7 @@ export async function getCount() {
     return result[0].count;
 }
 
-export async function create(body: CreateEventInput) {
+export async function create(body: CreateEventInput): Promise<Event> {
     const [event] = await db
         .insert(eventsTable)
         .values({ ...body, status: "SCHEDULED" })
@@ -38,7 +39,10 @@ export async function create(body: CreateEventInput) {
     return event;
 }
 
-export async function update(id: string, body: UpdateEventInput) {
+export async function update(
+    id: string,
+    body: UpdateEventInput,
+): Promise<Event> {
     const [event] = await db
         .update(eventsTable)
         .set({ ...body, updatedAt: new Date() })
@@ -48,11 +52,11 @@ export async function update(id: string, body: UpdateEventInput) {
     return event;
 }
 
-export async function remove(eventId: string) {
+export async function remove(eventId: string): Promise<void> {
     await db.delete(eventsTable).where(eq(eventsTable.id, eventId));
 }
 
-export async function claimEvent(eventId: string) {
+export async function claimEvent(eventId: string): Promise<Event> {
     const [event] = await db
         .update(eventsTable)
         .set({
@@ -69,7 +73,7 @@ export async function claimEvent(eventId: string) {
     return event;
 }
 
-export async function markCompleted(eventId: string) {
+export async function markCompleted(eventId: string): Promise<void> {
     await db
         .update(eventsTable)
         .set({ status: "COMPLETED", updatedAt: new Date() })
@@ -81,7 +85,7 @@ export async function markCompleted(eventId: string) {
         );
 }
 
-export async function markFailed(eventId: string) {
+export async function markFailed(eventId: string): Promise<void> {
     await db
         .update(eventsTable)
         .set({ status: "FAILED", updatedAt: new Date() })
