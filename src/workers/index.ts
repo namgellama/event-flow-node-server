@@ -1,4 +1,10 @@
+import { logger } from "../config/logger";
 import "./email.worker";
 import "./event.worker";
 
-console.log("Workers started");
+logger.info(
+    {
+        workers: ["email-queue", "event-queue"],
+    },
+    "Workers started",
+);

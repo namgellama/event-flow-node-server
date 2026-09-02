@@ -1,4 +1,5 @@
 import { Job, Worker } from "bullmq";
+import { logger } from "../config/logger";
 import { redis } from "../config/redis";
 import * as emailTemplateRepository from "../repositories/email-template.repository";
 import * as eventRecipientRepository from "../repositories/event-recipient.repository";
@@ -14,7 +15,14 @@ export const emailWorker = new Worker("email-queue", processEmail, {
 });
 
 emailWorker.on("completed", (job: Job) => {
-    console.log(`Job ${job.id} completed`);
+    logger.info(
+        {
+            jobId: job.id,
+            eventId: job.data.eventId,
+            userId: job.data.userId,
+        },
+        "Email job completed",
+    );
 });
 
 emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
@@ -22,11 +30,20 @@ emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
 
     const { eventId, userId } = job.data;
 
-    console.error(`Email job ${job.id} failed:`, error.message);
+    logger.error(
+        {
+            jobId: job.id,
+            eventId,
+            userId,
+            attempt: job.attemptsMade,
+            maxAttempts: job.opts.attempts ?? 1,
+            error: error.message,
+        },
+        "Email job failed",
+    );
 
     if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
         await eventRecipientRepository.markFailed(eventId, userId);
-
         await completeEventIfDone(eventId);
     }
 });
@@ -34,7 +51,9 @@ emailWorker.on("failed", async (job: Job | undefined, error: Error) => {
 async function processEmail(job: Job) {
     const { eventId, userId } = job.data;
 
-    console.log(`Sending email for event ${eventId} to recipient ${userId}`);
+    const logContext = { jobId: job.id, eventId, userId };
+
+    logger.info(logContext, "Processing email job");
 
     // Get recipient
     const eventRecipient = await eventRecipientRepository.findByEventAndUser(
@@ -47,7 +66,7 @@ async function processEmail(job: Job) {
     }
 
     if (eventRecipient.status === "SENT") {
-        console.log(`Email already sent to ${userId}`);
+        logger.info(logContext, "Email already sent, skipping");
         return;
     }
 
@@ -106,7 +125,13 @@ async function processEmail(job: Job) {
         providerMessageId: data.id,
     });
 
-    console.log(`Email sent to ${user.email}`);
+    logger.info(
+        {
+            ...logContext,
+            providerMessageId: data.id,
+        },
+        "Email sent successfully",
+    );
 
     await completeEventIfDone(eventId);
 }

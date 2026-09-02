@@ -1,4 +1,5 @@
 import { Job, Worker } from "bullmq";
+import { logger } from "../config/logger";
 import { redis } from "../config/redis";
 import { scheduleEmails } from "../queues/email.queue";
 import * as eventRecipientRepository from "../repositories/event-recipient.repository";
@@ -10,17 +11,36 @@ export const eventWorker = new Worker("event-queue", processEvent, {
 });
 
 eventWorker.on("completed", (job: Job) => {
-    console.log(`Job ${job.id} completed`);
+    logger.info(
+        {
+            jobId: job.id,
+            eventId: job.data.eventId,
+        },
+        "Event job completed",
+    );
 });
 
 eventWorker.on("failed", async (job: Job | undefined, error: Error) => {
     if (!job) return;
 
-    console.error(`Job ${job.id} failed:`, error.message);
+    const { eventId } = job.data;
+    const maxAttempts = job.opts.attempts ?? 1;
+    const isFinalAttempt = job.attemptsMade >= maxAttempts;
 
-    if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
-        const { eventId } = job.data;
+    logger.error(
+        {
+            jobId: job.id,
+            eventId,
+            attempt: job.attemptsMade,
+            maxAttempts,
+            error: error.message,
+        },
+        isFinalAttempt
+            ? "Event job permanently failed"
+            : "Event job failed, will retry",
+    );
 
+    if (isFinalAttempt) {
         await eventRepository.markFailed(eventId);
     }
 });
@@ -28,14 +48,22 @@ eventWorker.on("failed", async (job: Job | undefined, error: Error) => {
 async function processEvent(job: Job) {
     const { eventId } = job.data;
 
-    console.log(`Processing event: ${eventId}`);
+    const logContext = {
+        jobId: job.id,
+        eventId,
+    };
+
+    logger.info(logContext, "Processing event job");
 
     // Claim the event
     const event = await eventRepository.claimEvent(eventId);
 
     // Already processed/claimed
     if (!event) {
-        console.log(`Event ${eventId} is already being processed or completed`);
+        logger.info(
+            logContext,
+            "Event already being processed or completed, skipping",
+        );
         return;
     }
 
@@ -44,13 +72,22 @@ async function processEvent(job: Job) {
 
     if (recipients.length === 0) {
         await eventRepository.markCompleted(eventId);
+
+        logger.info(logContext, "Event has no recipients, marked as completed");
+
         return;
     }
 
     // Fan out email jobs
     await scheduleEmails(event.id, recipients);
 
-    console.log(`Queued ${recipients.length} emails for event ${eventId}`);
+    logger.info(
+        {
+            ...logContext,
+            recipientCount: recipients.length,
+        },
+        "Email jobs queued",
+    );
 }
 
 export async function completeEventIfDone(eventId: string) {
@@ -59,5 +96,10 @@ export async function completeEventIfDone(eventId: string) {
 
     if (!hasPending) {
         await eventRepository.markCompleted(eventId);
+
+        logger.info(
+            { eventId },
+            "All recipients processed, event marked as completed",
+        );
     }
 }
