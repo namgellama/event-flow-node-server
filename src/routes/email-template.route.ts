@@ -25,11 +25,6 @@ router.patch(
     validateBody(updateEmailTemplateSchema),
     emailTemplateController.updateEmailTemplate,
 );
-router.delete(
-    "/:id",
-    protect,
-    admin,
-    emailTemplateController.deleteEmailTemplate,
-);
+router.delete("/:id", protect, admin, emailTemplateController.deleteEmailTemplate);
 
 export default router;

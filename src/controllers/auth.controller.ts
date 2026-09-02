@@ -3,11 +3,7 @@ import { AppError } from "../errors/app-error";
 import * as authService from "../services/auth.service";
 import { sendResponse } from "../utils/response";
 
-export async function register(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
+export async function register(req: Request, res: Response, next: NextFunction) {
     try {
         const newUser = await authService.register(req.body);
 
@@ -37,11 +33,7 @@ export async function logout(_req: Request, res: Response, next: NextFunction) {
     }
 }
 
-export async function refreshToken(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
+export async function refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
         const refreshToken = req.cookies?.refreshToken;
 

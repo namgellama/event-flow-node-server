@@ -56,10 +56,7 @@ async function processEmail(job: Job) {
     logger.info(logContext, "Processing email job");
 
     // Get recipient
-    const eventRecipient = await eventRecipientRepository.findByEventAndUser(
-        eventId,
-        userId,
-    );
+    const eventRecipient = await eventRecipientRepository.findByEventAndUser(eventId, userId);
 
     if (!eventRecipient) {
         throw new Error(`Event recipient not found: ${eventId}/${userId}`);
@@ -91,9 +88,7 @@ async function processEmail(job: Job) {
     }
 
     // Get email template
-    const emailTemplate = await emailTemplateRepository.findById(
-        event.emailTemplateId,
-    );
+    const emailTemplate = await emailTemplateRepository.findById(event.emailTemplateId);
 
     if (!emailTemplate) {
         throw new Error(`Email template not found: ${event.emailTemplateId}`);

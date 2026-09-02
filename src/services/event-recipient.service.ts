@@ -3,16 +3,10 @@ import * as eventRecipientRepository from "../repositories/event-recipient.repos
 import * as eventService from "../services/event.service";
 import { EventRecipient } from "../types/event-recipient";
 
-export async function create(
-    eventId: string,
-    userId: string,
-): Promise<EventRecipient> {
+export async function create(eventId: string, userId: string): Promise<EventRecipient> {
     await eventService.findById(eventId);
 
-    const existing = await eventRecipientRepository.findByEventAndUser(
-        eventId,
-        userId,
-    );
+    const existing = await eventRecipientRepository.findByEventAndUser(eventId, userId);
 
     if (existing) {
         throw new AppError(409, "User is already a recipient of this event");

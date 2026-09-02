@@ -6,10 +6,7 @@ export const emailQueue = new Queue("email-queue", {
     connection: redis,
 });
 
-export async function scheduleEmails(
-    eventId: string,
-    recipients: EventRecipient[],
-) {
+export async function scheduleEmails(eventId: string, recipients: EventRecipient[]) {
     await emailQueue.addBulk(
         recipients.map((recipient) => ({
             name: "send-email",

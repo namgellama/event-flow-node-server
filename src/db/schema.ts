@@ -43,9 +43,7 @@ export const eventsTable = pgTable("events", {
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
-    emailTemplateId: uuid("emailTemplateId").references(
-        () => emailTemplatesTable.id,
-    ),
+    emailTemplateId: uuid("emailTemplateId").references(() => emailTemplatesTable.id),
 });
 
 export const emailTemplatesTable = pgTable("event_templates", {
@@ -65,8 +63,7 @@ export const eventRecipientStatusEnum = pgEnum("event_recipient_status", [
     "SENT",
     "FAILED",
 ]);
-export type EventRecipientStatus =
-    (typeof eventRecipientStatusEnum.enumValues)[number];
+export type EventRecipientStatus = (typeof eventRecipientStatusEnum.enumValues)[number];
 
 export const eventRecipientsTable = pgTable(
     "event_recipients",

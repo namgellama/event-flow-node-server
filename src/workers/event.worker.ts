@@ -35,9 +35,7 @@ eventWorker.on("failed", async (job: Job | undefined, error: Error) => {
             maxAttempts,
             error: error.message,
         },
-        isFinalAttempt
-            ? "Event job permanently failed"
-            : "Event job failed, will retry",
+        isFinalAttempt ? "Event job permanently failed" : "Event job failed, will retry",
     );
 
     if (isFinalAttempt) {
@@ -60,10 +58,7 @@ async function processEvent(job: Job) {
 
     // Already processed/claimed
     if (!event) {
-        logger.info(
-            logContext,
-            "Event already being processed or completed, skipping",
-        );
+        logger.info(logContext, "Event already being processed or completed, skipping");
         return;
     }
 
@@ -91,15 +86,11 @@ async function processEvent(job: Job) {
 }
 
 export async function completeEventIfDone(eventId: string) {
-    const hasPending =
-        await eventRecipientRepository.hasPendingRecipients(eventId);
+    const hasPending = await eventRecipientRepository.hasPendingRecipients(eventId);
 
     if (!hasPending) {
         await eventRepository.markCompleted(eventId);
 
-        logger.info(
-            { eventId },
-            "All recipients processed, event marked as completed",
-        );
+        logger.info({ eventId }, "All recipients processed, event marked as completed");
     }
 }

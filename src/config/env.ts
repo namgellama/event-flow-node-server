@@ -4,9 +4,7 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
-    NODE_ENV: z
-        .enum(["development", "production", "test"])
-        .default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     PORT: z.coerce.number().int().positive().default(8000),
     LOG_LEVEL: z
         .enum(["info", "error", "warn", "trace", "silent", "debug", "fatal"])
@@ -25,9 +23,7 @@ const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
     console.error("Invalid environment variables:");
-    console.error(
-        JSON.stringify(z.treeifyError(parsed.error).properties, null, 2),
-    );
+    console.error(JSON.stringify(z.treeifyError(parsed.error).properties, null, 2));
     process.exit(1);
 }
 

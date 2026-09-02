@@ -2,19 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import * as emailTemplateService from "../services/email-template.service";
 import { sendResponse } from "../utils/response";
 
-export async function getAllEmailTemplates(
-    _req: Request,
-    res: Response,
-    next: NextFunction,
-) {
+export async function getAllEmailTemplates(_req: Request, res: Response, next: NextFunction) {
     try {
         const emailTemplates = await emailTemplateService.getAll();
 
-        sendResponse(
-            res,
-            emailTemplates,
-            "Email Templates fetched successfully",
-        );
+        sendResponse(res, emailTemplates, "Email Templates fetched successfully");
     } catch (error) {
         next(error);
     }
@@ -26,9 +18,7 @@ export async function getEmailTemplate(
     next: NextFunction,
 ) {
     try {
-        const emailTemplate = await emailTemplateService.findById(
-            req.params.id,
-        );
+        const emailTemplate = await emailTemplateService.findById(req.params.id);
 
         sendResponse(res, emailTemplate, "Email Template fetched successfully");
     } catch (error) {
@@ -36,20 +26,11 @@ export async function getEmailTemplate(
     }
 }
 
-export async function createEmailTemplate(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) {
+export async function createEmailTemplate(req: Request, res: Response, next: NextFunction) {
     try {
         const emailTemplate = await emailTemplateService.create(req.body);
 
-        sendResponse(
-            res,
-            emailTemplate,
-            "Email template created successfully",
-            201,
-        );
+        sendResponse(res, emailTemplate, "Email template created successfully", 201);
     } catch (error) {
         next(error);
     }
@@ -61,10 +42,7 @@ export async function updateEmailTemplate(
     next: NextFunction,
 ) {
     try {
-        const emailTemplate = await emailTemplateService.update(
-            req.params.id,
-            req.body,
-        );
+        const emailTemplate = await emailTemplateService.update(req.params.id, req.body);
 
         sendResponse(res, emailTemplate, "Email Template updated successfully");
     } catch (error) {

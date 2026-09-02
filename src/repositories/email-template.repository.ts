@@ -11,9 +11,7 @@ export async function getAll(): Promise<EmailTemplate[]> {
     return db.select().from(emailTemplatesTable);
 }
 
-export async function findById(
-    emailTemplateId: string,
-): Promise<EmailTemplate | null> {
+export async function findById(emailTemplateId: string): Promise<EmailTemplate | null> {
     const [emailTemplate] = await db
         .select()
         .from(emailTemplatesTable)
@@ -22,13 +20,8 @@ export async function findById(
     return emailTemplate ?? null;
 }
 
-export async function create(
-    body: CreateEmailTemplateInput,
-): Promise<EmailTemplate> {
-    const [emailTemplate] = await db
-        .insert(emailTemplatesTable)
-        .values(body)
-        .returning();
+export async function create(body: CreateEmailTemplateInput): Promise<EmailTemplate> {
+    const [emailTemplate] = await db.insert(emailTemplatesTable).values(body).returning();
 
     return emailTemplate;
 }
@@ -47,7 +40,5 @@ export async function update(
 }
 
 export async function remove(emailTemplateId: string): Promise<void> {
-    await db
-        .delete(emailTemplatesTable)
-        .where(eq(emailTemplatesTable.id, emailTemplateId));
+    await db.delete(emailTemplatesTable).where(eq(emailTemplatesTable.id, emailTemplateId));
 }

@@ -10,11 +10,8 @@ export async function getAll(): Promise<EmailTemplate[]> {
     return emailTemplateRepository.getAll();
 }
 
-export async function findById(
-    emailTemplateId: string,
-): Promise<EmailTemplate> {
-    const emailTemplate =
-        await emailTemplateRepository.findById(emailTemplateId);
+export async function findById(emailTemplateId: string): Promise<EmailTemplate> {
+    const emailTemplate = await emailTemplateRepository.findById(emailTemplateId);
 
     if (!emailTemplate) {
         throw new AppError(404, "Email template not found");
@@ -23,9 +20,7 @@ export async function findById(
     return emailTemplate;
 }
 
-export async function create(
-    body: CreateEmailTemplateInput,
-): Promise<EmailTemplate> {
+export async function create(body: CreateEmailTemplateInput): Promise<EmailTemplate> {
     return emailTemplateRepository.create(body);
 }
 

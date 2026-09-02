@@ -8,9 +8,7 @@ import { LoginInput, RegisterInput } from "../schemas/auth.schema";
 import { User } from "../types/user";
 import { signToken, verifyToken } from "../utils/jwt";
 
-export async function register(
-    body: RegisterInput,
-): Promise<Omit<User, "password">> {
+export async function register(body: RegisterInput): Promise<Omit<User, "password">> {
     const existing = await userRepository.findByEmail(body.email);
 
     if (existing) {

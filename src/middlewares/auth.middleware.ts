@@ -4,11 +4,7 @@ import { AppError } from "../errors/app-error";
 import * as usersRepository from "../repositories/user.repository";
 import { verifyToken } from "../utils/jwt";
 
-export async function protect(
-    req: Request,
-    _res: Response,
-    next: NextFunction,
-) {
+export async function protect(req: Request, _res: Response, next: NextFunction) {
     try {
         const authHeader = req.headers.authorization;
 

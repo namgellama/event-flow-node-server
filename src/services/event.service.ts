@@ -6,10 +6,7 @@ import { CreateEventInput, UpdateEventInput } from "../schemas/event.schema";
 import * as emailTemplateService from "../services/email-template.service";
 import { Event, PaginatedEvent } from "../types/event";
 
-export async function getAll(
-    page: number,
-    pageSize: number,
-): Promise<PaginatedEvent> {
+export async function getAll(page: number, pageSize: number): Promise<PaginatedEvent> {
     const offset = (page - 1) * pageSize;
 
     const [events, total] = await Promise.all([
@@ -52,8 +49,7 @@ export async function create(body: CreateEventInput): Promise<Event> {
     const event = await eventRepository.create(body);
 
     if (event.emailTemplateId) {
-        const queueDelay =
-            env.NODE_ENV === "development" ? env.EVENT_QUEUE_DELAY : delay;
+        const queueDelay = env.NODE_ENV === "development" ? env.EVENT_QUEUE_DELAY : delay;
 
         await scheduleEvent(event.id, queueDelay);
     }
@@ -61,10 +57,7 @@ export async function create(body: CreateEventInput): Promise<Event> {
     return event;
 }
 
-export async function update(
-    eventId: string,
-    body: UpdateEventInput,
-): Promise<Event> {
+export async function update(eventId: string, body: UpdateEventInput): Promise<Event> {
     await findById(eventId);
 
     if (body.emailTemplateId) {

@@ -8,17 +8,9 @@ export async function createEventRecipient(
     next: NextFunction,
 ) {
     try {
-        const eventRecipient = await eventRecipientService.create(
-            req.params.id,
-            req.user!.id,
-        );
+        const eventRecipient = await eventRecipientService.create(req.params.id, req.user!.id);
 
-        sendResponse(
-            res,
-            eventRecipient,
-            "Event Recipient created successfully",
-            201,
-        );
+        sendResponse(res, eventRecipient, "Event Recipient created successfully", 201);
     } catch (error) {
         next(error);
     }

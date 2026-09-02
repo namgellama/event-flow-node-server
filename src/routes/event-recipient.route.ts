@@ -4,10 +4,6 @@ import * as eventRecipientController from "../controllers/event-recipient.contro
 
 const router = Router({ mergeParams: true });
 
-router.post(
-    "/event-recipients",
-    protect,
-    eventRecipientController.createEventRecipient,
-);
+router.post("/event-recipients", protect, eventRecipientController.createEventRecipient);
 
 export default router;
