@@ -8,6 +8,9 @@ const envSchema = z.object({
         .enum(["development", "production", "test"])
         .default("development"),
     PORT: z.coerce.number().int().positive().default(8000),
+    LOG_LEVEL: z
+        .enum(["info", "error", "warn", "trace", "silent", "debug", "fatal"])
+        .default("info"),
     DATABASE_URL: z.string(),
     JWT_ACCESS_SECRET: z.string(),
     JWT_ACCESS_EXPIRY: z.string(),
